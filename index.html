@@ -46,6 +46,9 @@ f.onload=setup;
 if(f.complete)setup();
 
 let down=false,last;
+  const music=new Audio("filtered-81212544-081C-4D86-9A9E-9E76F09148B7.MP4");
+music.preload="auto";
+let musicStarted=false;
 
 function p(e){
 let b=c.getBoundingClientRect();
@@ -53,9 +56,15 @@ return{x:e.clientX-b.left,y:e.clientY-b.top};
 }
 
 c.onpointerdown=e=>{
-down=true;
-last=p(e);
-c.setPointerCapture(e.pointerId);
+  down=true;
+  last=p(e);
+
+  if(!musicStarted){
+    music.play();
+    musicStarted=true;
+  }
+
+  c.setPointerCapture(e.pointerId);
 };
 
 c.onpointermove=e=>{
