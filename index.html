@@ -1,170 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>We Have a Little Secret</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Save Our Date</title>
 <style>
 *{box-sizing:border-box}
-
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  min-height:100%;
-  background:#f8f1e7;
-}
-
-body{
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  overflow-x:hidden;
-}
-
-.card{
-  position:relative;
-  width:min(100vw,540px);
-  aspect-ratio:9/16;
-}
-
-.card img{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-#reveal{
-  z-index:1;
-}
-
-#front{
-  z-index:2;
-}
-
-#scratch{
-  position:absolute;
-  z-index:3;
-  left:21%;
-  top:52%;
-  width:62%;
-  height:30%;
-  touch-action:none;
-}
+body{margin:0;background:#f8f1e7;display:flex;justify-content:center}
+.card{position:relative;width:min(100vw,540px);aspect-ratio:9/16}
+img{position:absolute;width:100%;height:100%;object-fit:cover}
+#reveal{z-index:1}
+#front{z-index:2}
+#scratch{position:absolute;z-index:3;left:27%;top:47.5%;width:46%;height:25.9%;border-radius:50%;touch-action:none}
 </style>
 </head>
-
 <body>
 
 <div class="card">
-  <img id="reveal" src="Untitled design - 1.png" alt="">
-  <img id="front" src="Untitled design - 2.png" alt="">
-  <canvas id="scratch"></canvas>
+<img id="reveal" src="IMG_0489.png">
+<img id="front" src="IMG_0488.png">
+<canvas id="scratch"></canvas>
 </div>
 
 <script>
-const front=document.getElementById('front');
-const canvas=document.getElementById('scratch');
-const ctx=canvas.getContext('2d');
-
-const R={
-  x:.21,
-  y:.52,
-  w:.62,
-  h:.30
-};
+const f=document.getElementById("front");
+const c=document.getElementById("scratch");
+const x=c.getContext("2d");
 
 function setup(){
-  const rect=canvas.getBoundingClientRect();
+let b=c.getBoundingClientRect();
+c.width=b.width*2;
+c.height=b.height*2;
+x.scale(2,2);
 
-  canvas.width=Math.round(rect.width*2);
-  canvas.height=Math.round(rect.height*2);
+x.drawImage(f,
+f.naturalWidth*.27,
+f.naturalHeight*.475,
+f.naturalWidth*.46,
+f.naturalHeight*.259,
+0,0,b.width,b.height);
 
-  ctx.setTransform(2,0,0,2,0,0);
-  ctx.clearRect(0,0,rect.width,rect.height);
-
-  ctx.drawImage(
-    front,
-    front.naturalWidth*R.x,
-    front.naturalHeight*R.y,
-    front.naturalWidth*R.w,
-    front.naturalHeight*R.h,
-    0,
-    0,
-    rect.width,
-    rect.height
-  );
-
-  front.style.clipPath=
-    `polygon(
-      0 0,
-      100% 0,
-      100% 100%,
-      0 100%,
-      0 ${R.y*100}%,
-      ${R.x*100}% ${R.y*100}%,
-      ${R.x*100}% ${(R.y+R.h)*100}%,
-      ${(R.x+R.w)*100}% ${(R.y+R.h)*100}%,
-      ${(R.x+R.w)*100}% ${R.y*100}%,
-      0 ${R.y*100}%
-    )`;
+f.style.clipPath="polygon(0 0,100% 0,100% 100%,0 100%,0 47.5%,27% 47.5%,27% 73.4%,73% 73.4%,73% 47.5%,0 47.5%)";
 }
 
-front.onload=setup;
+f.onload=setup;
+if(f.complete)setup();
 
-if(front.complete){
-  setup();
+let down=false,last;
+
+function p(e){
+let b=c.getBoundingClientRect();
+return{x:e.clientX-b.left,y:e.clientY-b.top};
 }
 
-let scratching=false;
-let last=null;
-
-function point(e){
-  const b=canvas.getBoundingClientRect();
-
-  return {
-    x:e.clientX-b.left,
-    y:e.clientY-b.top
-  };
-}
-
-function erase(a,b){
-  ctx.save();
-  ctx.globalCompositeOperation='destination-out';
-  ctx.lineCap='round';
-  ctx.lineJoin='round';
-  ctx.lineWidth=42;
-
-  ctx.beginPath();
-  ctx.moveTo(a.x,a.y);
-  ctx.lineTo(b.x,b.y);
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-canvas.onpointerdown=e=>{
-  scratching=true;
-  last=point(e);
-  canvas.setPointerCapture(e.pointerId);
+c.onpointerdown=e=>{
+down=true;
+last=p(e);
+c.setPointerCapture(e.pointerId);
 };
 
-canvas.onpointermove=e=>{
-  if(!scratching)return;
-
-  const q=point(e);
-  erase(last,q);
-  last=q;
+c.onpointermove=e=>{
+if(!down)return;
+let q=p(e);
+x.globalCompositeOperation="destination-out";
+x.lineCap="round";
+x.lineWidth=58;
+x.beginPath();
+x.moveTo(last.x,last.y);
+x.lineTo(q.x,q.y);
+x.stroke();
+last=q;
 };
 
-canvas.onpointerup=
-canvas.onpointercancel=()=>{
-  scratching=false;
-};
+c.onpointerup=c.onpointercancel=()=>down=false;
 </script>
 
 </body>
