@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Save Our Date</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  background:#f8f1e7;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow-x:hidden;
+}
+
+.card{
+  position:relative;
+  width:min(100vw,540px);
+  aspect-ratio:9/16;
+}
+
+.card img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+#reveal{z-index:1;}
+#front{z-index:2;}
+
+#scratch{
+  position:absolute;
+  z-index:3;
+  left:27%;
+  top:48%;
+  width:46%;
+  height:25%;
+  touch-action:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <img id="reveal" src="../IMG_0489.png" alt="">
+  <img id="front" src="../IMG_0488.png" alt="">
+  <canvas id="scratch"></canvas>
+</div>
+
+<script>
+const f=document.getElementById("front");
+const c=document.getElementById("scratch");
+const x=c.getContext("2d");
+
+const R={x:.27,y:.48,w:.46,h:.25};
+
+const music=new Audio("../filtered-81212544-081C-4D86-9A9E-9E76F09148B7.MP4");
+music.preload="auto";
+
+/* AUTOPLAY TEST */
+function startMusic(){
+  music.play().catch(()=>{
+    console.log("Autoplay with sound was blocked by the browser.");
+  });
+}
+
+window.addEventListener("load",startMusic);
+
+function setup(){
+  let r=c.getBoundingClientRect();
+
+  c.width=Math.round(r.width*2);
+  c.height=Math.round(r.height*2);
+
+  x.setTransform(2,0,0,2,0,0);
+  x.clearRect(0,0,r.width,r.height);
+
+  x.drawImage(
+    f,
+    f.naturalWidth*R.x,
+    f.naturalHeight*R.y,
+    f.naturalWidth*R.w,
+    f.naturalHeight*R.h,
+    0,0,r.width,r.height
+  );
+
+  f.style.clipPath=`polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 ${R.y*100}%,
+    ${R.x*100}% ${R.y*100}%,
+    ${R.x*100}% ${(R.y+R.h)*100}%,
+    ${(R.x+R.w)*100}% ${(R.y+R.h)*100}%,
+    ${(R.x+R.w)*100}% ${R.y*100}%,
+    0 ${R.y*100}%
+  )`;
+}
+
+f.onload=setup;
+if(f.complete)setup();
+
+let down=false,last;
+
+function p(e){
+  let b=c.getBoundingClientRect();
+  return{
+    x:e.clientX-b.left,
+    y:e.clientY-b.top
+  };
+}
+
+c.onpointerdown=e=>{
+  down=true;
+  last=p(e);
+  c.setPointerCapture(e.pointerId);
+};
+
+c.onpointermove=e=>{
+  if(!down)return;
+
+  let q=p(e);
+
+  x.globalCompositeOperation="destination-out";
+  x.lineCap="round";
+  x.lineJoin="round";
+  x.lineWidth=58;
+
+  x.beginPath();
+  x.moveTo(last.x,last.y);
+  x.lineTo(q.x,q.y);
+  x.stroke();
+
+  last=q;
+};
+
+c.onpointerup=c.onpointercancel=()=>down=false;
+</script>
+
+</body>
+</html>
